@@ -27,7 +27,7 @@ if nwindows == 1:
     trace2 = np.argmax(data1[nrows/2][ncols/2:-20])
     
     x_pos1 = trace1 + 20
-    x_pos2 = trace2 + nrows/2
+    x_pos2 = trace2 + ncols/2
 
 if nwindows == 2:
     trace1 = np.argmax(data1[nrows/2][20:-20])
@@ -50,16 +50,16 @@ plt.axvline(x_pos1 - args.background_offset-args.background_width//2,color='g',l
 plt.axvline(x_pos1 - args.background_offset+args.background_width//2,color='g',ls='--')
 
 if nwindows == 1:
-	plt.axvline(x_pos2 + args.spectral_width,color='g')
-	plt.axvline(x_pos2 - args.spectral_width,color='g')
-	plt.axvline(x_pos2 + args.background_offset+args.background_width//2,color='g',ls='--')
-	plt.axvline(x_pos2 + args.background_offset-args.background_width//2,color='g',ls='--')
-	plt.axvline(x_pos2 - args.background_offset-args.background_width//2,color='g',ls='--')
-	plt.axvline(x_pos2 - args.background_offset+args.background_width//2,color='g',ls='--')
+    plt.axvline(x_pos2 + args.spectral_width,color='g')
+    plt.axvline(x_pos2 - args.spectral_width,color='g')
+    plt.axvline(x_pos2 + args.background_offset+args.background_width//2,color='g',ls='--')
+    plt.axvline(x_pos2 + args.background_offset-args.background_width//2,color='g',ls='--')
+    plt.axvline(x_pos2 - args.background_offset-args.background_width//2,color='g',ls='--')
+    plt.axvline(x_pos2 - args.background_offset+args.background_width//2,color='g',ls='--')
 
 
 if nwindows == 2:
-	plt.xlim(0,ncols)
+    plt.xlim(0,ncols)
     plt.ylim(0,nrows)
     plt.show()
     
@@ -76,8 +76,8 @@ if nwindows == 2:
     plt.axvline(x_pos2 - args.background_offset-args.background_width//2,color='g',ls='--')
     plt.axvline(x_pos2 - args.background_offset+args.background_width//2,color='g',ls='--')
     
-plt.xlim(0,np.shape(data2)[1])
-plt.ylim(0,np.shape(data2)[0])
+plt.xlim(0,ncols)
+plt.ylim(0,nrows)
 plt.show()
 
 
@@ -96,7 +96,10 @@ def normalise(data):
     return (data - data.min())/(data.max()-data.min())
 
 spec1,back1,corr1 = get_spectrum(data1,x_pos1,args.spectral_width,args.background_width,args.background_offset)
-spec2,back2,corr2 = get_spectrum(data2,x_pos2,args.spectral_width,args.background_width,args.background_offset)
+if nwindows == 1:
+    spec2,back2,corr2 = get_spectrum(data1,x_pos2,args.spectral_width,args.background_width,args.background_offset)
+else:
+    spec2,back2,corr2 = get_spectrum(data2,x_pos2,args.spectral_width,args.background_width,args.background_offset)
 
 print "Peak counts (line 1) = ",np.max(corr1),"Y position = ",range(len(corr1))[np.argmax(corr1)]
 print "Peak counts (line 2) = ",np.max(corr2),"Y position = ",range(len(corr2))[np.argmax(corr2)]
@@ -121,7 +124,7 @@ plt.show()
 
 
 plt.figure()
-plt.plot(xaxis,corr1/corr2)
+plt.plot(corr1/corr2)
 plt.xlabel('Y pixel')
 plt.ylabel('Left/Right')
 plt.title('Ratio of spectra')
