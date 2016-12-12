@@ -17,4 +17,4 @@ Scipy
 Astropy
 Matplotlib
 
-DS9 (if using finding chart tool)
+DS9 (if using finding chart tool) v7.4 for full compatibility
