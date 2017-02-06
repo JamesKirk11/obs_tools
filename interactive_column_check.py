@@ -74,7 +74,7 @@ else: # Using a 40" slit, which we don't have empirical data for so I'm assuming
 	#~ y_win = [300,2301]
 	
 x_win = [args.window[0],args.window[1]]
-y_win = [args.window[2],args.window[3]]
+y_win = [str(int(args.window[2])-800),str(int(args.window[3])-800)]
 	
 
 
