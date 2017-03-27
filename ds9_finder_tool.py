@@ -38,6 +38,12 @@ if args.instrument == 'ACAM':
     
     else:
         raise ValueError('Slit must be either 40 or 27')
+        
+if args.instrument == 'EFOSC':
+	fov = 4.1
+	search_radius = 4.1
+	slit_width = 15
+	slit_length = 4.1
     
     
 if args.tc:
