@@ -23,6 +23,8 @@ parser.add_argument("--cc",help="Use if wanting to manually define comparison co
 parser.add_argument("--mc",help="Use if wanting to manually define midpoint coords. Must be used like --mc '00h00m00s 00d00m00s'",nargs='+',type=str)
 parser.add_argument("-pa","--position_angle",help="Use if wanting to manually define position angle",type=float)
 
+parser.add_argument("-p2s","--print_to_screen",help='Use this function to print the DS9 commands to the terminal for copying and pasting if having issues with automatic opening',action='store_true')
+
 args = parser.parse_args()
 
 if args.instrument == 'ACAM':
@@ -40,10 +42,10 @@ if args.instrument == 'ACAM':
         raise ValueError('Slit must be either 40 or 27')
         
 if args.instrument == 'EFOSC':
-	fov = 4.1
-	search_radius = 4.1
-	slit_width = 15
-	slit_length = 4.1*60
+    fov = 4.1
+    search_radius = 4.1
+    slit_width = 15
+    slit_length = 4.1*60
     
     
 if args.tc:
@@ -61,9 +63,9 @@ if args.qr:
 v = Vizier(columns=['Full','+_r','_RAJ2000', '_DEJ2000','B-V', 'Vmag','Bmag'],column_filters={"Vmag":"<%f"%args.magnitude_cut})
 
 if args.apass:
-	catalog = 'APASS9'
+    catalog = 'APASS9'
 else:
-	catalog = 'UCAC4'
+    catalog = 'UCAC4'
 
 if not args.tc and not args.qr:
 
@@ -177,13 +179,26 @@ TARG_DEC = targ_dec
 COMP_RA = comp_ra
 COMP_DEC = comp_dec
 
-os.system('ds9 %s size %.1f %.1f arcmin %s coord %f %f degrees  \
-                  -regions system wcs -regions command "point %fd %fd # point=cross 40 color=red" \
-                  -regions command "point %fd %fd # point=cross 40 color=blue" \
-                  -regions command "box(%fd,%fd,%f",%f",%f)" \
-                  -grid yes -grid grid no -grid type publication -grid axes type exterior \
-                  -grid title no -grid numerics color black -grid labels yes -grid labels color black \
-                   -grid numerics type exterior \
-                   -grid title yes -grid title text %s -grid title def no \
-                    -wcs fk5 &' %(image,fov,fov,image,MID_RA,MID_DEC,TARG_RA,TARG_DEC,COMP_RA,COMP_DEC,MID_RA,MID_DEC,slit_length*slit_correction_factor,slit_width*slit_correction_factor,pa-90,args.target))
+if not args.print_to_screen:
+    os.system('ds9 %s size %.1f %.1f arcmin %s coord %f %f degrees  \
+                      -regions system wcs -regions command "point %fd %fd # point=cross 40 color=red" \
+                      -regions command "point %fd %fd # point=cross 40 color=blue" \
+                      -regions command "box(%fd,%fd,%f",%f",%f)" \
+                      -grid yes -grid grid no -grid type publication -grid axes type exterior \
+                      -grid title no -grid numerics color black -grid labels yes -grid labels color black \
+                       -grid numerics type exterior \
+                       -grid title yes -grid title text %s -grid title def no \
+                        -wcs fk5 &' %(image,fov,fov,image,MID_RA,MID_DEC,TARG_RA,TARG_DEC,COMP_RA,COMP_DEC,MID_RA,MID_DEC,slit_length*slit_correction_factor,slit_width*slit_correction_factor,pa-90,args.target))
 
+else:
+    print '\n ------- COPY AND PASTE THE FOLLOWING INTO A TERMINAL ---------'
+    print 'ds9 %s size %.1f %.1f arcmin %s coord %f %f degrees  \
+                      -regions system wcs -regions command "point %fd %fd # point=cross 40 color=red" \
+                      -regions command "point %fd %fd # point=cross 40 color=blue" \
+                      -regions command "box(%fd,%fd,%f",%f",%f)" \
+                      -grid yes -grid grid no -grid type publication -grid axes type exterior \
+                      -grid title no -grid numerics color black -grid labels yes -grid labels color black \
+                       -grid numerics type exterior \
+                       -grid title yes -grid title text %s -grid title def no \
+                        -wcs fk5 &' %(image,fov,fov,image,MID_RA,MID_DEC,TARG_RA,TARG_DEC,COMP_RA,COMP_DEC,MID_RA,MID_DEC,slit_length*slit_correction_factor,slit_width*slit_correction_factor,pa-90,args.target)
+print '\n'
