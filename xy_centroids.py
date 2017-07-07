@@ -50,9 +50,9 @@ x_left = []y_left = []x_right = []y_right = []mjd = []flist = []
 max_counts = []y_pos_max_counts = []fwhm_x = []fwhm_y = []
 for i,f in enumerate(l):
     hdu = fits.open(f)    hdr = hdu[0].header
-    if np.logical_and("ACAMMODE" in hdr.keys(),"OBJECT" in hdr.keys()):
+    if np.logical_and("ACAMMODE" in hdr.keys(),"OBJECT" in hdr.keys()):        if hdr["ACAMFILT"] != "CLEAR+V400":		    print "ignoring blocking filter, frame ",f		    continue
         print f,hdr["ACAMMODE"],hdr["OBJECT"]
-        if hdr["ACAMMODE"] == "SPECTROSCOPY" and hdr["OBJECT"] == obj_name:
+        if hdr["ACAMMODE"] == "SPECTROSCOPY" and hdr["OBJECT"] == obj_name:            
             frame1 = hdu[1].data                        if nwindows == 2:                frame2 = hdu[2].data                max_counts.append(np.max((frame1,frame2)))
             mjd.append(hdr["MJD-OBS"])            flist.append(f)
             hdu.close()
