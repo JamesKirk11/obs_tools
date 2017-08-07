@@ -10,7 +10,7 @@ parser.add_argument("target",help="Name of object to be resolved by Vizier",type
 parser.add_argument("-inst","--instrument",help="Which instrument? Needed for field of view & slit width and length. Default = ACAM",default='ACAM')
 parser.add_argument('-cat',"--catalog",help="Name of catalog to query [APASS9/UCAC4], default = UCAC4",default='UCAC4')
 
-parser.add_argument("-s","--slit",help="Use this to define which ACAM slit is used, default = 40",type=int,default=40)
+parser.add_argument("-s","--slit",help="Use this to define the width of the slit in arcseconds, default = 40",type=int,default=40)
 parser.add_argument("-v","--magnitude_cut",help="If wanting to cut V magnitude at a partciular value. Default = 14.",type=float,default=14)
 
 parser.add_argument("-2mass","--twomass",help='If wanting to display a 2MASS bkg image.',action='store_true')
@@ -49,10 +49,47 @@ if args.instrument == 'EFOSC':
     
     
 if args.tc:
-    targ_ra,targ_dec = args.tc[0].split()
-    comp_ra,comp_dec = args.cc[0].split()
-    mid_ra,mid_dec = args.mc[0].split()
-    pa = args.position_angle
+    targ_ra_hms,targ_dec_dms = args.tc[0].split()
+    targ_coords = SkyCoord(targ_ra_hms,targ_dec_dms)
+    targ_ra = targ_coords.ra.deg
+    targ_dec = targ_coords.dec.deg
+    
+    
+    comp_ra_hms,comp_dec_dms = args.cc[0].split()
+    comp_coords = SkyCoord(comp_ra_hms,comp_dec_dms)
+    comp_ra = comp_coords.ra.deg
+    comp_dec = comp_coords.dec.deg
+    #comp_ra,comp_dec = args.cc[0].split()
+    #mid_ra,mid_dec = args.mc[0].split()
+    #pa = args.position_angle
+    
+    # find rough midpoint between target and comparison to load image into DS9
+    mid_ra = (targ_ra + comp_ra)/2.
+    mid_dec = (targ_dec + comp_dec)/2.
+    mid = SkyCoord(ra=mid_ra*u.degree,dec=mid_dec*u.degree)
+    
+    # CALCULATE POSITION ANGLE USING FOUR PART FORMULA SEE Smart 1949 textbook on spherical astronomy, p12
+    
+    #np.cos(a)*np.cos(C) = np.sin(a)*np.cot(b) - np.sin(C)*np.cot(B)
+    
+    targ_coords = SkyCoord(ra=targ_ra*u.degree,dec=targ_dec*u.degree)
+    comp_coords = SkyCoord(ra=comp_ra*u.degree,dec=comp_dec*u.degree)
+    
+    rarad1 = np.array([targ_ra*np.pi/12.0])
+    rarad2 = np.array([comp_ra*np.pi/12.0])
+    dcrad1 = np.array([targ_dec*np.pi/180.0])
+    dcrad2 = np.array([comp_dec*np.pi/180.0])
+    
+    radif  = rarad2-rarad1
+    angle  = np.arctan(np.sin(radif),np.cos(dcrad1)*np.tan(dcrad2)-np.sin(dcrad1)*np.cos(radif))
+    
+    sep = 60*(np.arccos(np.sin(targ_dec*np.pi/180.0)*np.sin(comp_dec*np.pi/180) + np.cos(comp_dec*np.pi/180)*np.cos(targ_dec*np.pi/180)*np.cos(comp_ra*np.pi/180 - targ_ra*np.pi/180)))*180.0/np.pi
+    
+    c1 = SkyCoord(targ_ra*u.deg,targ_dec*u.deg)
+    c2 = SkyCoord(comp_ra*u.deg,comp_dec*u.deg)
+    
+    pa = c1.position_angle(c2).degree
+    
 
 if args.qr:
     targ_ra_hms,targ_dec_dms = args.qr[0].split()
