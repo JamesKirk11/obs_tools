@@ -90,6 +90,11 @@ if args.tc:
     
     pa = c1.position_angle(c2).degree
     
+    print "==="
+    print "Position angle = ",pa
+    print "Separation = ",sep," arcmin"
+    print "Midpoint coords = ",mid.to_string('hmsdms')
+    print "==="
 
 if args.qr:
     targ_ra_hms,targ_dec_dms = args.qr[0].split()
