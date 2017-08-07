@@ -13,16 +13,19 @@ parser.add_argument("-yup","--upper_y_cutoff",help="Define upper cutoff in y pix
 args = parser.parse_args()
 
 f = fits.open(args.fits_file)
-
+print len(f)
 nwindows = len(f) - 1
 
-data1 = f[1].data
+if nwindows == 0: # Using EFOSC data:
+    data1 = f[0].data
+if nwindows == 1:
+    data1 = f[1].data
 if nwindows == 2:
     data2 = f[2].data 
 
 nrows,ncols = np.shape(data1)
 
-if nwindows == 1:
+if nwindows <= 1:
     trace1 = np.argmax(data1[nrows/2][20:ncols/2])
     trace2 = np.argmax(data1[nrows/2][ncols/2:-20])
     
@@ -49,7 +52,7 @@ plt.axvline(x_pos1 + args.background_offset-args.background_width//2,color='g',l
 plt.axvline(x_pos1 - args.background_offset-args.background_width//2,color='g',ls='--')
 plt.axvline(x_pos1 - args.background_offset+args.background_width//2,color='g',ls='--')
 
-if nwindows == 1:
+if nwindows <= 1:
     plt.axvline(x_pos2 + args.spectral_width,color='g')
     plt.axvline(x_pos2 - args.spectral_width,color='g')
     plt.axvline(x_pos2 + args.background_offset+args.background_width//2,color='g',ls='--')
@@ -96,7 +99,7 @@ def normalise(data):
     return (data - data.min())/(data.max()-data.min())
 
 spec1,back1,corr1 = get_spectrum(data1,x_pos1,args.spectral_width,args.background_width,args.background_offset)
-if nwindows == 1:
+if nwindows <= 1:
     spec2,back2,corr2 = get_spectrum(data1,x_pos2,args.spectral_width,args.background_width,args.background_offset)
 else:
     spec2,back2,corr2 = get_spectrum(data2,x_pos2,args.spectral_width,args.background_width,args.background_offset)
