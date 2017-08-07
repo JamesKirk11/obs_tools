@@ -99,8 +99,8 @@ if args.instrument == 'EFOSC':
 # ADD FIXED WIDTH BETWEEN STARS, PERHAPS CONVERTING WCS TO PIXEL COORDS? USE X PIXEL BOX OF 100 PIXELS FOR BACKGROUND. 2 strips of 50 pixel width. 2 vertical strips of correct separtion, collapse in x and take ratio of these
 # Choose windows. Which slit?
 
-
-plt.ion()
+if args.pixel is None:
+    plt.ion()
 
 # PLOT CHIP / FITS FILE
 fig1 = plt.figure(figsize=(16,14))
