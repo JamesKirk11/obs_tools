@@ -27,9 +27,11 @@ if args.instrument == 'EFOSC':
 	pix_scale = pix_conversion*arcsec_per_pix
 	y_range = [1030/2-7.5/pix_scale,1030/2+7.5/pix_scale]
 	x_range = [0,1030] 
+	pixel_width = args.pixel_width/2.
 	
 if args.instrument == 'ACAM':
 	pix_scale = 0.25 # arcsec/pixel
+	pixel_width = args.pixel_width
 
 colours = ['r','g','b','k','c','m']
 
@@ -150,16 +152,16 @@ for i in range(args.nclicks):
 		plt.scatter(x_comp[i],y_pos,color=colours[i],marker='+')
 	
 	if args.y_collapse:
-		plt.axhline(y_pos + args.pixel_width,color=colours[i])
-		plt.axhline(y_pos - args.pixel_width,color=colours[i])
+		plt.axhline(y_pos + pixel_width,color=colours[i])
+		plt.axhline(y_pos - pixel_width,color=colours[i])
 	
 	else:	# Collapsing in x and plotting in y
-		plt.axvline(x_pos + args.pixel_width,color=colours[i])
-		plt.axvline(x_pos - args.pixel_width,color=colours[i])
+		plt.axvline(x_pos + pixel_width,color=colours[i])
+		plt.axvline(x_pos - pixel_width,color=colours[i])
 
 		if args.star_distance != None:
-			plt.axvline(x_comp[i] + args.pixel_width,color=colours[i],ls='--')
-			plt.axvline(x_comp[i] - args.pixel_width,color=colours[i],ls='--')
+			plt.axvline(x_comp[i] + pixel_width,color=colours[i],ls='--')
+			plt.axvline(x_comp[i] - pixel_width,color=colours[i],ls='--')
 
 plt.xlim(0,np.shape(data)[1])
 plt.ylim(0,np.shape(data)[0])
@@ -170,16 +172,16 @@ fig2 = plt.figure()
 for i in range(args.nclicks):
 
 	if args.y_collapse:
-		spectra = data[x[i][1]-args.pixel_width:x[i][1]+args.pixel_width]
+		spectra = data[x[i][1]-pixel_width:x[i][1]+pixel_width]
 		plt.plot(spectra.sum(axis=0),color=colours[i])
 
 	else: # Collapsing in x and plotting in y
-		spectra = data[:,x[i][0]-args.pixel_width:x[i][0]+args.pixel_width]
+		spectra = data[:,x[i][0]-pixel_width:x[i][0]+pixel_width]
 		#plt.plot(spectra.sum(axis=1),color=colours[i])
 		plt.plot(spectra,color=colours[i])
 		
 		if args.star_distance != None:
-			spectra_comp = data[:,int(x_comp[i]-args.pixel_width):int(x_comp[i]+args.pixel_width)]
+			spectra_comp = data[:,int(x_comp[i]-pixel_width):int(x_comp[i]+pixel_width)]
 			spec_ratio.append(spectra.sum(axis=1)/np.array(spectra_comp,dtype=float).sum(axis=1))
 			#plt.plot(spectra_comp.sum(axis=1),color=colours[i],ls='--')
 			plt.plot(spectra_comp,color=colours[i+1])
@@ -201,15 +203,15 @@ fig3 = plt.figure()
 for i in range(args.nclicks):
 
 	if args.y_collapse:
-		spectra = data[x[i][1]-args.pixel_width:x[i][1]+args.pixel_width]
+		spectra = data[x[i][1]-pixel_width:x[i][1]+pixel_width]
 		print spectra.sum(axis=0)
 		plt.plot(spectra.sum(axis=0),color=colours[i])
 
 	else:
-		plt.plot(np.arange(x[i][0]-args.pixel_width,x[i][0]+args.pixel_width),spectra.sum(axis=0),color=colours[i])
+		plt.plot(np.arange(x[i][0]-pixel_width,x[i][0]+pixel_width),spectra.sum(axis=0),color=colours[i])
 		
 		if args.star_distance != None:
-			plt.plot(np.arange(x_comp[i]-args.pixel_width,x_comp[i]+args.pixel_width),spectra_comp.sum(axis=0),color=colours[i],ls='--')
+			plt.plot(np.arange(x_comp[i]-pixel_width,x_comp[i]+pixel_width),spectra_comp.sum(axis=0),color=colours[i],ls='--')
 
 plt.ylabel('Counts')
 plt.xlabel('X position (pixels)')
