@@ -23,8 +23,12 @@ else:
 	
 if args.instrument == 'EFOSC':
 	arcsec_per_pix = 0.12 # arcsec/pixel in manual
-	pix_conversion = 2048/1030. # This is needed because the calibration file used was done with 2x2 binning
-	pix_scale = pix_conversion*arcsec_per_pix
+	print len(data)
+	if len(data) == 2060:
+	    pix_scale = arcsec_per_pix
+	else:
+	    pix_conversion = 2048/1030. # This is needed because the calibration file used was done with 2x2 binning
+	    pix_scale = pix_conversion*arcsec_per_pix
 	y_range = [1030/2-7.5/pix_scale,1030/2+7.5/pix_scale]
 	x_range = [0,1030] 
 	pixel_width = args.pixel_width/2.
@@ -139,6 +143,10 @@ else:
 if args.star_distance != None:
 	x_comp = [x[i][0] + args.star_distance*60/pix_scale for i in range(args.nclicks)]
 	print "x position of comparison = ",x_comp
+	if args.instrument == "EFOSC":
+		print "x position of centre of slit = ",(x_comp+x[i][0])/2.
+		if len(data) != 2060:
+		    print "x position of centre of slit (unbinned) = ",(x_comp+x[i][0])
 
 
 # Plot frame with selected regions overlaid
