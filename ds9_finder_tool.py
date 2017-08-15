@@ -44,7 +44,7 @@ if args.instrument == 'ACAM':
 if args.instrument == 'EFOSC':
     fov = 4.1
     search_radius = 4.1
-    slit_width = 15
+    slit_width = args.slit
     slit_length = 4.1*60
     
     
