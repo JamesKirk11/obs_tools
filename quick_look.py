@@ -18,7 +18,7 @@ nwindows = len(f) - 1
 
 if nwindows == 0: # Using EFOSC data:
     data1 = f[0].data
-if nwindows == 1:
+if nwindows >= 1:
     data1 = f[1].data
 if nwindows == 2:
     data2 = f[2].data 
