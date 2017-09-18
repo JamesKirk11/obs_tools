@@ -28,7 +28,9 @@ nrows,ncols = np.shape(data1)
 if nwindows <= 1:
     trace1 = np.argmax(data1[nrows/2][20:ncols/2])
     trace2 = np.argmax(data1[nrows/2][ncols/2:-20])
-    
+
+    #x_pos1 = 337
+    #x_pos2 = 900
     x_pos1 = trace1 + 20
     x_pos2 = trace2 + ncols/2
 
