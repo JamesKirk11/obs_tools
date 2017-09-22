@@ -5,15 +5,15 @@ file_names = sorted(glob.glob("r*.fit"))if args.reference_image is not None: 
 
 def extract_flux_x(frame,x_beg,x_end,y_cont,dy_cont,spec_w,bkg_w,bkg_off):
     
-    frame_subset = frame[y_cont-dy_cont//2:y_cont+dy_cont//2+1,x_beg:x_end]    
-    max_ind = np.median(np.argmax(frame_subset,axis=1))    
-    spec_2d = frame_subset[:,max_ind-spec_w//2:max_ind+spec_w//2+1]
+    frame_subset = frame[y_cont-dy_cont/2:y_cont+dy_cont/2+1,x_beg:x_end]    
+    max_ind = int(np.median(np.argmax(frame_subset,axis=1)))    
+    spec_2d = frame_subset[:,max_ind-int(spec_w//2):max_ind+int(spec_w//2)+1]
     
-    bkg_1_2d = frame_subset[:,max_ind-bkg_off-bkg_w//2:max_ind-bkg_off+bkg_w//2+1]    bkg_2_2d = frame_subset[:,max_ind+bkg_off-bkg_w//2:max_ind+bkg_off+bkg_w//2+1]    
+    bkg_1_2d = frame_subset[:,max_ind-bkg_off-int(bkg_w//2):max_ind-bkg_off+int(bkg_w//2)+1]    bkg_2_2d = frame_subset[:,max_ind+bkg_off-int(bkg_w//2):max_ind+bkg_off+int(bkg_w//2)+1]    
     bkg = np.column_stack((bkg_1_2d,bkg_2_2d)).mean(axis=1)    
     spec = (spec_2d - bkg[:,None]).sum(axis=0)    
     return x_beg+max_ind, spec
-def extract_flux_y(frame,x_beg,x_end,y_line_h32,dy_line,spec_w,bkg_w,bkg_off):        frame_subset = frame[y_line_h32-dy_line//2:y_line_h32+dy_line//2+1,x_beg:x_end]    
+def extract_flux_y(frame,x_beg,x_end,y_line_h32,dy_line,spec_w,bkg_w,bkg_off):        frame_subset = frame[y_line_h32-dy_line/2:y_line_h32+dy_line/2+1,x_beg:x_end]    
     y =  np.arange(frame_subset.shape[0])    
     spec_2d, bkg_1_2d, bkg_2_2d = spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off)    
     bkg = np.column_stack((bkg_1_2d,bkg_2_2d)).mean(axis=1)    
@@ -22,13 +22,13 @@ def extract_flux_x(frame,x_beg,x_end,y_cont,dy_cont,spec_w,bkg_w,bkg_off):
 
 def spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off):
     max_ind = model_track(frame_subset,y)
-    spec_cut = np.array([np.arange(im-spec_w//2,im+spec_w//2+1).tolist() for im in max_ind])
+    spec_cut = np.array([np.arange(im-spec_w/2,im+spec_w/2+1).tolist() for im in max_ind])
     spec_cut[spec_cut<0] = 0
     spec_cut[spec_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1
-    bkg_1_cut = np.array([np.arange(im-bkg_off-bkg_w//2,im-bkg_off+bkg_w//2+1).tolist() for im in max_ind])
+    bkg_1_cut = np.array([np.arange(im-bkg_off-bkg_w/2,im-bkg_off+bkg_w/2+1).tolist() for im in max_ind])
     bkg_1_cut[bkg_1_cut<0] = 0
     bkg_1_cut[bkg_1_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1
-    bkg_2_cut = np.array([np.arange(im+bkg_off-bkg_w//2,im+bkg_off+bkg_w//2+1).tolist() for im in max_ind]) 
+    bkg_2_cut = np.array([np.arange(im+bkg_off-bkg_w/2,im+bkg_off+bkg_w/2+1).tolist() for im in max_ind]) 
     bkg_2_cut[bkg_2_cut<0] = 0
     bkg_2_cut[bkg_2_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1
     b_spec_ind = np.broadcast_arrays(y[:,None],spec_cut)
@@ -53,7 +53,7 @@ for i,f in enumerate(l):
     if np.logical_and("ACAMMODE" in hdr.keys(),"OBJECT" in hdr.keys()):        if hdr["ACAMFILT"] != "CLEAR+V400":		    print "ignoring blocking filter, frame ",f		    continue
         print f,hdr["ACAMMODE"],hdr["OBJECT"]
         if hdr["ACAMMODE"] == "SPECTROSCOPY" and hdr["OBJECT"] == obj_name:            
-            frame1 = hdu[1].data                        if nwindows == 2:                frame2 = hdu[2].data                max_counts.append(np.max((frame1,frame2)))
+            frame1 = hdu[1].data                        if nwindows == 2:                frame2 = hdu[2].data                max_counts.append(np.max((frame1,frame2)))            else:				max_counts.append(np.max(frame1))
             mjd.append(hdr["MJD-OBS"])            flist.append(f)
             hdu.close()
             # Extract flux in x collapsed in y            peak_x, flux_x = extract_flux_x(frame1,x_beg_left,x_end_left,y_cont,dy_cont,spec_w,bkg_w,bkg_off)
