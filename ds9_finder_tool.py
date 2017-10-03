@@ -2,7 +2,7 @@ import os
 from astroquery.vizier import Vizier
 import astropy.units as u
 import numpy as np
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, FK5, ICRS
 import argparse
 
 parser = argparse.ArgumentParser(description='Make finding chart with DS9')
@@ -15,6 +15,8 @@ parser.add_argument("-v","--magnitude_cut",help="If wanting to cut V magnitude a
 
 parser.add_argument("-2mass","--twomass",help='If wanting to display a 2MASS bkg image.',action='store_true')
 parser.add_argument("-apass","--apass",help="If wanting to use APASS9, rather than UCAC4 catalog",action="store_true")
+
+parser.add_argument("-precess","--precess",help="If wanting to calculate proper motion corrected and precess coordinates. Takes equinox as argument, e.g. 'J2017.5'. WARNING: this has not been tested!")
 
 parser.add_argument("--qr",help="Use this argument if the database cannot resolve the object's name. Must be used like --qr '00h00m00s 00d00m00s'",nargs='+',type=str)
 
@@ -102,7 +104,7 @@ if args.qr:
     targ_ra = c.ra.deg
     targ_dec = c.dec.deg
     
-v = Vizier(columns=['Full','+_r','_RAJ2000', '_DEJ2000','B-V', 'Vmag','Bmag'],column_filters={"Vmag":"<%f"%args.magnitude_cut})
+v = Vizier(columns=['Full','+_r','_RAJ2000', '_DEJ2000','B-V', 'Vmag','Bmag','pmRA','pmDE'],column_filters={"Vmag":"<%f"%args.magnitude_cut})
 
 if args.apass:
     catalog = 'APASS9'
@@ -134,13 +136,14 @@ if not args.tc and not args.qr:
         if args.apass:
             keys = ['_r','_RAJ2000', '_DEJ2000','B-V', 'Vmag','Bmag']
         else:
-            keys = ['_r','_RAJ2000', '_DEJ2000','Vmag','Bmag']
+            keys = ['_r','_RAJ2000', '_DEJ2000','Vmag','Bmag','pmRA','pmDE']
         for key in keys:
             target_dict[key] = np.array(viz_result[key])
     
     else:
         for key in viz_result.keys():
-            target_dict[key] = np.array(viz_result[key].filled(999).tolist())
+            #target_dict[key] = np.array(viz_result[key].filled(999).tolist())
+            target_dict[key] = viz_result[key][0]
     
     targ_ra = target_dict['_RAJ2000']
     targ_dec = target_dict['_DEJ2000']
@@ -196,6 +199,25 @@ if not args.tc:
     c2 = SkyCoord(comp_ra*u.deg,comp_dec*u.deg)
     
     pa = c1.position_angle(c2).degree
+    
+    if args.precess and not args.apass:
+        targ_coords_ICRS = ICRS(ra=targ_ra*u.degree,dec=targ_dec*u.degree,pm_ra_cosdec=table[0]['pmRA']*u.mas/u.yr,pm_dec=table[0]['pmDE']*u.mas/u.yr)
+        comp_coords_ICRS = ICRS(ra=comp_ra*u.degree,dec=comp_dec*u.degree,pm_ra_cosdec=table[which_comp]['pmRA']*u.mas/u.yr,pm_dec=table[which_comp]['pmRA']*u.mas/u.yr)
+        targ_coors_precessed = targ_coords_ICRS.transform_to(FK5(equinox=args.precess))
+        comp_coors_precessed = comp_coords_ICRS.transform_to(FK5(equinox=args.precess))
+        
+        corrected_targ = SkyCoord(targ_coors_precessed.ra,targ_coors_precessed.dec)
+        corrected_comp = SkyCoord(comp_coors_precessed.ra,comp_coors_precessed.dec)
+        corrected_pa = corrected_targ.position_angle(corrected_comp).degree
+        
+        corrected_mid_ra = (corrected_targ.ra + corrected_comp.ra)/2.
+        corrected_mid_dec = (corrected_targ.dec + corrected_comp.dec)/2.
+        corrected_mid = SkyCoord(ra=corrected_mid_ra,dec=corrected_mid_dec)
+
+        corrected_sep = 60*(np.arccos(np.sin(corrected_targ.dec*np.pi/180.0)*np.sin(corrected_comp.dec*np.pi/180) + np.cos(corrected_comp.dec*np.pi/180)*np.cos(corrected_targ.dec*np.pi/180)*np.cos(corrected_comp.ra*np.pi/180 - corrected_targ.ra*np.pi/180)))*180.0/np.pi
+
+        
+        
 
     print "\n==="
     print "Target coords = ",targ_ra,targ_dec
@@ -216,6 +238,15 @@ if not args.tc:
     print "Separation = ",sep," arcmin"
     print "Midpoint coords = ",mid.to_string('hmsdms')
     print "=== \n"
+    
+    if args.precess:
+        print '= WARNING, THESE MIGHT NOT BE ACCURATE'
+        print "Precessed target coords = ",corrected_targ.to_string('hmsdms')
+        print "Precessed comparison coords = ",corrected_comp.to_string('hmsdms')
+        print "Precessed Position angle = ",corrected_pa
+        print "Precessed Separation = ",corrected_sep.to(u.deg).value," arcmin"
+        print "Precessed Midpoint coords = ",corrected_mid.to_string('hmsdms')
+        print "=== \n"
 
 print 'PLEASE CHECK BOX / SLIT IN DS9, IT MAY BE OF THE INCORRECT DIMENSIONS!!!!!'
 print 'TARGET IS RED CROSSHAIR, COMPARISON IS BLUE'
