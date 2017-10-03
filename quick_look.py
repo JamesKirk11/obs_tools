@@ -5,6 +5,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Plot 1D spectra interactively as a first look. Very rough, assumes the spectra are the birghtest things on the chip and does not account for curvature of the traces.')
 parser.add_argument("fits_file",help="Which fits file to load?",type=str)
+parser.add_argument('-x','--x',type=int,nargs='+',help='Use if wanting to define the rough locations, in x, of the stars')
 parser.add_argument("-sw","--spectral_width",help="Define width in pixels over which to sum the spectra, default = 50",default=50,type=int)
 parser.add_argument("-bw","--background_width",help="Define width in pixels over which to estimate the background, default = 60",default=60,type=int)
 parser.add_argument("-bo","--background_offset",help="Define offset in pixels from the spectra over which to estimate the background, default = 80",default=80,type=int)
@@ -24,22 +25,28 @@ if nwindows == 2:
     data2 = f[2].data 
 
 nrows,ncols = np.shape(data1)
+if args.x is not None:
+	
+    trace1 = np.argmax(data1[nrows/2][args.x[0]-20:args.x[0]+20])
+    trace2 = np.argmax(data1[nrows/2][args.x[1]-20:args.x[1]+20])
 
-if nwindows <= 1:
-    trace1 = np.argmax(data1[nrows/2][20:ncols/2])
-    trace2 = np.argmax(data1[nrows/2][ncols/2:-20])
-
-    #x_pos1 = 337
-    #x_pos2 = 900
-    x_pos1 = trace1 + 20
-    x_pos2 = trace2 + ncols/2
-
-if nwindows == 2:
-    trace1 = np.argmax(data1[nrows/2][20:-20])
-    trace2 = np.argmax(data2[nrows/2][20:-20])
-    
-    x_pos1 = trace1 + 20
-    x_pos2 = trace2 + 20
+    x_pos1 = trace1 + args.x[0] - 20
+    x_pos2 = trace2 + args.x[1] - 20
+	
+else:
+	if nwindows <= 1:
+	    trace1 = np.argmax(data1[nrows/2][20:ncols/2])
+	    trace2 = np.argmax(data1[nrows/2][ncols/2:-20])
+	
+	    x_pos1 = trace1 + 20
+	    x_pos2 = trace2 + ncols/2
+	
+	if nwindows == 2:
+	    trace1 = np.argmax(data1[nrows/2][20:-20])
+	    trace2 = np.argmax(data2[nrows/2][20:-20])
+	    
+	    x_pos1 = trace1 + 20
+	    x_pos2 = trace2 + 20
     
 y_pos1 = y_pos2 = nrows/2
 
