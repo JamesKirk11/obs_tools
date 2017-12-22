@@ -27,7 +27,7 @@ if args.instrument == 'EFOSC':
 	if len(data) == 2060:
 	    pix_scale = arcsec_per_pix
 	else:
-	    pix_conversion = 2048/1030. # This is needed because the calibration file used was done with 2x2 binning
+	    pix_conversion = 2060/1030. # This is needed because the calibration file used was done with 2x2 binning
 	    pix_scale = pix_conversion*arcsec_per_pix
 	y_range = [1030/2-7.5/pix_scale,1030/2+7.5/pix_scale]
 	x_range = [0,1030] 
