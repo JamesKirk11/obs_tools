@@ -49,6 +49,13 @@ if args.instrument == 'EFOSC':
     slit_width = args.slit
     slit_length = 4.1*60
     
+if args.instrument == 'ALFOSC':
+    fov = 6.3
+    search_radius = 6.3
+    slit_width = 40
+    slit_length = 6.3*60
+
+    
     
 if args.tc:
     targ_ra_hms,targ_dec_dms = args.tc[0].split()
