@@ -65,9 +65,9 @@ for i,f in enumerate(l):
             parms_y_left = sopt.leastsq(moffat_y,np.array([4.0,1.5,y_line_left,-150000.,0.,50000.]),args=(y,flux_y))              fwhm_y.append(0.25*2*parms_y_left[0][0]*np.sqrt(2**(1/parms_y_left[0][1])-1)) # 0.25 needed for arcsec conversion
             if f == ref_frame:
                 xfine = np.arange(x[0],x[-1],0.001)    
-                plt.figure()                plt.plot(x,flux_x,'.')                plt.plot(xfine,moffat_x_mod(parms_x_left[0],xfine))                plt.title("x centroiding for left spectrum")                plt.ylabel("flux")                plt.xlabel("x pixel")                plt.show()                              
+                plt.figure()                plt.plot(x,flux_x,'.')                plt.plot(xfine,moffat_x_mod(parms_x_left[0],xfine))                plt.title("X centroiding for left spectrum")                plt.ylabel("Counts (ADU)")                plt.xlabel("X pixel")                plt.show()                              
                 yfine = np.arange(y[0],y[-1],0.001)    
-                plt.figure()                plt.plot(y,flux_y,'.')                plt.plot(yfine,moffat_y_mod(parms_y_left[0],yfine))                plt.title("y centroiding for left spectrum")                plt.ylabel("flux")                plt.xlabel("y pixel")                plt.show()
+                plt.figure()                plt.plot(y,flux_y,'.')                plt.plot(yfine,moffat_y_mod(parms_y_left[0],yfine))                plt.title("Y centroiding for left spectrum")                plt.ylabel("Counts (ADU)")                plt.xlabel("Y pixel")                plt.show()
             if nwindows == 2:                peak_x, flux_x = extract_flux_x(frame2,x_beg_right,x_end_right,y_cont,dy_cont,spec_w,bkg_w,bkg_off)                flux_y = extract_flux_y(frame2,x_beg_right,x_end_right,y_line_right,dy_line,spec_w,bkg_w,bkg_off)            else:                peak_x, flux_x = extract_flux_x(frame1,x_beg_right,x_end_right,y_cont,dy_cont,spec_w,bkg_w,bkg_off)                flux_y = extract_flux_y(frame1,x_beg_right,x_end_right,y_line_right,dy_line,spec_w,bkg_w,bkg_off)            x = peak_x+np.arange(-len(flux_x)/2,len(flux_x)/2)            # Model flux in x with a gaussian.            parms_x_right = sopt.leastsq(moffat_x,np.array([6.0,4.0,peak_x,650000.,0.]),args=(x,flux_x))
 
             y = y_line_right - dy_line//2 + np.arange(len(flux_y)) 
@@ -78,9 +78,9 @@ for i,f in enumerate(l):
             y_right.append(parms_y_right[0][2])
             if f == ref_frame:            
                 xfine = np.arange(x[0],x[-1],0.001)
-                plt.figure()                plt.plot(x,flux_x,'.')                plt.plot(xfine,moffat_x_mod(parms_x_right[0],xfine))                plt.title("x centroiding for right spectrum")                plt.ylabel("flux")                plt.xlabel("x pixel")                plt.show()                          
+                plt.figure()                plt.plot(x,flux_x,'.')                plt.plot(xfine,moffat_x_mod(parms_x_right[0],xfine))                plt.title("X centroiding for right spectrum")                plt.ylabel("Counts (ADU)")                plt.xlabel("X pixel")                plt.show()                          
                 yfine = np.arange(y[0],y[-1],0.001)
-                plt.figure()                plt.plot(y,flux_y,'.')                plt.plot(yfine,moffat_y_mod(parms_y_right[0],yfine))                plt.title("y centroiding for right spectrum")                plt.ylabel("flux")                plt.xlabel("y pixel")                plt.show()    
+                plt.figure()                plt.plot(y,flux_y,'.')                plt.plot(yfine,moffat_y_mod(parms_y_right[0],yfine))                plt.title("Y centroiding for right spectrum")                plt.ylabel("Counts (ADU)")                plt.xlabel("Y pixel")                plt.show()    
         else:            print "ACAMMODE OR OBJECT NAME DO NOT MATCH"
             hdu.close()            break
     else:
