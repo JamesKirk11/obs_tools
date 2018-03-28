@@ -229,20 +229,20 @@ if not args.tc:
     print "\n==="
     print "Target coords = ",targ_ra,targ_dec
     print "Target coords = ",targ_coords.to_string('hmsdms')
-    print "Target Vmag = ",table[0]['Vmag']
-    print "Target B-V = ",table[0]['Bmag'] - table[0]['Vmag']
+    print "Target Vmag = %.2f"%(table[0]['Vmag'])
+    print "Target B-V = %.2f"%(table[0]['Bmag'] - table[0]['Vmag'])
 
     print '='
 
     print "Comparison coords = ",comp_ra,comp_dec
     print "Comparison coords = ",comp_coords.to_string('hmsdms')
-    print "Comparison Vmag = ",table[which_comp]['Vmag']
-    print "Comparison B-V = ",table[which_comp]['Bmag'] - table[which_comp]['Vmag']
+    print "Comparison Vmag = %.2f"%table[which_comp]['Vmag']
+    print "Comparison B-V = %.2f"%(table[which_comp]['Bmag'] - table[which_comp]['Vmag'])
 
     print '='
 
-    print "Position angle = ",pa
-    print "Separation = ",sep," arcmin"
+    print "Position angle = %.3f"%pa
+    print "Separation = %.3f arcmin"%sep
     print "Midpoint coords = ",mid.to_string('hmsdms')
     print "=== \n"
     
