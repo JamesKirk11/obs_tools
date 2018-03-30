@@ -45,9 +45,17 @@ if args.instrument == 'ACAM':
         
 if args.instrument == 'EFOSC':
     fov = 4.1
-    search_radius = 4.1
     slit_width = args.slit
-    slit_length = 4.1*60
+
+    if slit_width == 27:
+        #search_radius = 4.1 # This is value from webpages and is incorrect!
+        #slit_length = 4.1*60
+        search_radius = 3.53 # This is measured value!
+        slit_length = 3.53*60
+    elif slit_width == 15:
+        raise NotImplementedError
+    else:
+        raise ValueError('slit width must be 27 or 15 for EFOSC')
     
 if args.instrument == 'ALFOSC':
     fov = 6.3
