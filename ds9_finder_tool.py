@@ -250,6 +250,8 @@ if not args.tc:
     print '='
 
     print "Position angle = %.3f"%pa
+    if args.instrument == 'EFOSC':
+		print "Rotator angle (EFOSC) = %.3f"%(90-pa)
     print "Separation = %.3f arcmin"%sep
     print "Midpoint coords = ",mid.to_string('hmsdms')
     print "=== \n"
