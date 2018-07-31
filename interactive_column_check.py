@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 
-parser = argparse.ArgumentParser(description='Plot 1D spectra interactively to check for bad pixels/columns. NEEDS TO BE RUN INTERACTIVELY THROUGH IPYTHON!')
+parser = argparse.ArgumentParser(description='Plot 1D spectra interactively to check for bad pixels/columns.')
 parser.add_argument("fits_file",help="Which fits file to load?",type=str)
-parser.add_argument("-n","--nclicks",help="Number of mouse clicks (and hence number of spectra) to be plotted, default = 1",type=int,default=1)
+parser.add_argument("-n","--nclicks",help="Number of mouse clicks (and hence number of spectra) to be plotted, default = 1. If using this, NEEDS TO BE RUN INTERACTIVELY THROUGH IPYTHON!",type=int,default=1)
 parser.add_argument("-pw","--pixel_width",help="Define width in pixels over which to perform the collapse, default = 50",default=50,type=int)
 parser.add_argument("-d","--star_distance",help="Define distance between stars on chip, in arcminutes",type=float)
 parser.add_argument("-y","--y_collapse",help="if wanting to collapse in y rather than x, default=x",action="store_true")
