@@ -34,7 +34,7 @@ if args.instrument == 'EFOSC':
 	pixel_width = args.pixel_width/2.
 	
 if args.instrument == 'ACAM':
-	pix_scale = 0.25 # arcsec/pixel
+	pix_scale = 0.253 # arcsec/pixel in x, in y it is 0.254
 	pixel_width = args.pixel_width
 
 colours = ['r','g','b','k','c','m']
