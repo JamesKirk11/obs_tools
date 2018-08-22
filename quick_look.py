@@ -14,7 +14,6 @@ parser.add_argument("-yup","--upper_y_cutoff",help="Define upper cutoff in y pix
 args = parser.parse_args()
 
 f = fits.open(args.fits_file)
-print len(f)
 nwindows = len(f) - 1
 
 if nwindows == 0: # Using EFOSC data:
@@ -113,8 +112,8 @@ if nwindows <= 1:
 else:
     spec2,back2,corr2 = get_spectrum(data2,x_pos2,args.spectral_width,args.background_width,args.background_offset)
 
-print "Peak counts (line 1) = ",np.max(corr1),"Y position = ",range(len(corr1))[np.argmax(corr1)]
-print "Peak counts (line 2) = ",np.max(corr2),"Y position = ",range(len(corr2))[np.argmax(corr2)]
+#print "Peak counts (line 1) = ",np.max(corr1),"Y position = ",range(len(corr1))[np.argmax(corr1)]
+#print "Peak counts (line 2) = ",np.max(corr2),"Y position = ",range(len(corr2))[np.argmax(corr2)]
 
 plt.figure()
 plt.plot(corr1,color='r',label='Left')
@@ -129,15 +128,15 @@ xaxis = range(args.lower_y_cutoff,nrows+args.upper_y_cutoff)
 plt.figure()
 plt.plot(xaxis,normalise(corr1)[args.lower_y_cutoff:args.upper_y_cutoff],color='r',label='Left')
 plt.plot(xaxis,normalise(corr2)[args.lower_y_cutoff:args.upper_y_cutoff],color='b',label='Right')
-plt.xlabel('Y pixel + %d'%args.lower_y_cutoff)
+plt.xlabel('Y pixel')# + %d'%args.lower_y_cutoff)
 plt.ylabel('Normalised counts')
 plt.legend()
 plt.show()
 
 
-plt.figure()
-plt.plot(corr1/corr2)
-plt.xlabel('Y pixel')
-plt.ylabel('Left/Right')
-plt.title('Ratio of spectra')
-plt.show()
+#plt.figure()
+#plt.plot(corr1/corr2)
+#plt.xlabel('Y pixel')
+#plt.ylabel('Left/Right')
+#plt.title('Ratio of spectra')
+#plt.show()
