@@ -26,23 +26,23 @@ if nwindows == 2:
 nrows,ncols = np.shape(data1)
 if args.x is not None:
 	
-    trace1 = np.argmax(data1[nrows/2][args.x[0]-20:args.x[0]+20])
-    trace2 = np.argmax(data1[nrows/2][args.x[1]-20:args.x[1]+20])
+    trace1 = np.argmax(data1[nrows//2][args.x[0]-20:args.x[0]+20])
+    trace2 = np.argmax(data1[nrows//2][args.x[1]-20:args.x[1]+20])
 
     x_pos1 = trace1 + args.x[0] - 20
     x_pos2 = trace2 + args.x[1] - 20
 	
 else:
 	if nwindows <= 1:
-	    trace1 = np.argmax(data1[nrows/2][20:ncols/2])
-	    trace2 = np.argmax(data1[nrows/2][ncols/2:-20])
+	    trace1 = np.argmax(data1[nrows//2][20:ncols//2])
+	    trace2 = np.argmax(data1[nrows//2][ncols//2:-20])
 	
 	    x_pos1 = trace1 + 20
 	    x_pos2 = trace2 + ncols/2
 	
 	if nwindows == 2:
-	    trace1 = np.argmax(data1[nrows/2][20:-20])
-	    trace2 = np.argmax(data2[nrows/2][20:-20])
+	    trace1 = np.argmax(data1[nrows//2][20:-20])
+	    trace2 = np.argmax(data2[nrows//2][20:-20])
 	    
 	    x_pos1 = trace1 + 20
 	    x_pos2 = trace2 + 20
@@ -94,9 +94,9 @@ plt.show()
 
 def get_spectrum(imdata,selected_region,spec_width,bkg_width,bkg_off):
 
-    spectra = imdata[:,selected_region-spec_width:selected_region+spec_width]
-    background_1 = imdata[:,selected_region-bkg_off-bkg_width//2:selected_region-bkg_off+bkg_width//2]
-    background_2 = imdata[:,selected_region+bkg_off-bkg_width//2:selected_region+bkg_off+bkg_width//2]
+    spectra = imdata[:,int(selected_region-spec_width):int(selected_region+spec_width)]
+    background_1 = imdata[:,int(selected_region-bkg_off-bkg_width//2):int(selected_region-bkg_off+bkg_width//2)]
+    background_2 = imdata[:,int(selected_region+bkg_off-bkg_width//2):int(selected_region+bkg_off+bkg_width//2)]
     mean_bkg = np.column_stack((background_1,background_2)).mean(axis=1)
     spec_corrected = spectra - mean_bkg[:,None]
     
