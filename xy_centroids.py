@@ -12,12 +12,12 @@ def extract_flux_x(frame,x_beg,x_end,y_cont,dy_cont,spec_w,bkg_w,bkg_off):
     bkg = np.column_stack((bkg_1_2d,bkg_2_2d)).mean(axis=1)    
     spec = (spec_2d - bkg[:,None]).sum(axis=0)    
     return x_beg+max_ind, spec
-def extract_flux_y(frame,x_beg,x_end,y_line_h32,dy_line,spec_w,bkg_w,bkg_off):        frame_subset = frame[int(y_line_h32-dy_line/2):int(y_line_h32+dy_line/2)+1,int(x_beg):int(x_end)]    
-    y =  np.arange(frame_subset.shape[0])    
-    spec_2d, bkg_1_2d, bkg_2_2d = spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off)    
-    bkg = np.column_stack((bkg_1_2d,bkg_2_2d)).mean(axis=1)    
-    spec = (spec_2d - bkg[:,None]).sum(axis=1)    
-    return spec
+def extract_flux_y(frame,x_beg,x_end,y_line,dy_line,spec_w,bkg_w,bkg_off):        frame_subset = frame[int(y_line-dy_line/2):int(y_line+dy_line/2)+1,int(x_beg):int(x_end)]    
+    y =  np.arange(frame_subset.shape[0])        trace = model_track(frame_subset,y)        spec = []         for i in range(dy_line):        spec.append(frame_subset[i][trace[i]])    
+    # spec_2d, bkg_1_2d, bkg_2_2d = spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off)    
+    # bkg = np.column_stack((bkg_1_2d,bkg_2_2d)).mean(axis=1)    
+    # spec = (spec_2d - bkg[:,None]).sum(axis=1)    
+    return np.array(spec)
 
 def spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off):
     max_ind = model_track(frame_subset,y)
@@ -31,13 +31,11 @@ def spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off):
     bkg_2_cut[bkg_2_cut<0] = 0
     bkg_2_cut[bkg_2_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1
     b_spec_ind = np.broadcast_arrays(y[:,None],spec_cut)
-    spec_ind = [b_spec_ind[0].tolist(),b_spec_ind[1].tolist()]
+    spec_ind = np.array([b_spec_ind[0].tolist(),b_spec_ind[1].tolist()]).astype(int)
     b_bkg_1_ind = np.broadcast_arrays(y[:,None],bkg_1_cut)
-    bkg_1_ind = [b_bkg_1_ind[0].tolist(),b_bkg_1_ind[1].tolist()]
+    bkg_1_ind = np.array([b_bkg_1_ind[0].tolist(),b_bkg_1_ind[1].tolist()]).astype(int)
     b_bkg_2_ind = np.broadcast_arrays(y[:,None],bkg_2_cut)
-    bkg_2_ind = [b_bkg_2_ind[0].tolist(),b_bkg_2_ind[1].tolist()]
-
-    return frame_subset[np.array(spec_ind).astype(int)], frame_subset[np.array(bkg_1_ind).astype(int)], frame_subset[np.array(bkg_2_ind).astype(int)]
+    bkg_2_ind = np.array([b_bkg_2_ind[0].tolist(),b_bkg_2_ind[1].tolist()]).astype(int)    return frame_subset,spec_ind    return np.array([frame_subset[spec_ind[0]],frame_subset[spec_ind[1]]])#, np.array([frame_subset[bkg_1_ind[0]],frame_subset[bkg_1_ind[1]]]), np.array([frame_subset[bkg_2_ind[0]],frame_subset[bkg_2_ind[1]]])
   def model_track(data,y):    """Function that takes in some subset of the data frame and outputs a list of the modelled maxima """    
     # Cubic fit to the     p = np.polyfit(y,np.argmax(data,axis=1),3)    mod = np.around(np.polyval(p,y)).astype(int)    return mod
 def moffat_x_mod(a,r):    x = 2. * (a[1]-1.) / (a[0] * a[0])    y = 1. + ((r-a[2])/a[0])**2.    return a[3] * (x * (y ** -a[1])) + a[4]
@@ -99,4 +97,4 @@ plt.subplot(211)if args.n_images is None:
 plt.subplot(212)if args.n_images is None:
     plt.plot(mjd-mjd[0],y_right-y_right[ref_i],'k.')else:    plt.plot((mjd-mjd[0])[1:],(y_right-y_right[ref_i])[1:],'k.')plt.title("y centroid of spectral line at y~"+str(y_line_right)+" (Comparison)")plt.xlabel("JD from start of observations")plt.ylabel("y centroid - reference")if args.no_save:    plt.show()else:    plt.savefig('yshift_y%d.png'%y_line_left)    plt.show()
 plt.figure()plt.scatter(range(len(max_counts)),max_counts)plt.xlabel("Frames from start")plt.ylabel("Max counts")if not args.no_save:    plt.savefig('max_counts.png')plt.show()
-plt.figure()plt.scatter(range(len(fwhm_x)),fwhm_x,color='b')plt.xlabel("Frames from start")plt.ylabel("FWHM (arcsec)")if not args.no_save:    plt.savefig('fwhm_y%d.png'%y_cont)plt.show()if not args.no_save:    pickle.dump(fwhm_x,open('fwhm_y%d.pickle'%y_cont,'w'))    pickle.dump(x_right-x_right[ref_i],open('x2_yline_%d.pickle'%y_line_right,'w'))    pickle.dump(x_left-x_left[ref_i],open('x1_yline_%d.pickle'%y_line_left,'w'))    pickle.dump(y_right-y_right[ref_i],open('y2_yline_%d.pickle'%y_line_right,'w'))    pickle.dump(y_left-y_left[ref_i],open('y1_yline_%d.pickle'%y_line_left,'w'))    pickle.dump(max_counts,open('max_counts.pickle','w'))    
+plt.figure()plt.scatter(range(len(fwhm_x)),fwhm_x,color='b')plt.xlabel("Frames from start")plt.ylabel("FWHM (arcsec)")if not args.no_save:    plt.savefig('fwhm_y%d.png'%y_cont)plt.show()if not args.no_save:    pickle.dump(fwhm_x,open('fwhm_y%d.pickle'%y_cont,'wb'))    pickle.dump(x_right-x_right[ref_i],open('x2_yline_%d.pickle'%y_line_right,'wb'))    pickle.dump(x_left-x_left[ref_i],open('x1_yline_%d.pickle'%y_line_left,'wb'))    pickle.dump(y_right-y_right[ref_i],open('y2_yline_%d.pickle'%y_line_right,'wb'))    pickle.dump(y_left-y_left[ref_i],open('y1_yline_%d.pickle'%y_line_left,'wb'))    pickle.dump(max_counts,open('max_counts.pickle','wb'))    
