@@ -107,11 +107,11 @@ if args.tc:
     
     pa = c1.position_angle(c2).degree
     
-    print "==="
-    print "Position angle = ",pa
-    print "Separation = ",sep," arcmin"
-    print "Midpoint coords = ",mid.to_string('hmsdms')
-    print "==="
+    print("===")
+    print("Position angle = ",pa)
+    print("Separation = ",sep," arcmin")
+    print("Midpoint coords = ",mid.to_string('hmsdms'))
+    print("===")
 
 if args.qr:
     targ_ra_hms,targ_dec_dms = args.qr[0].split()
@@ -144,8 +144,8 @@ if not args.tc and not args.qr:
     target_dict = {}
     
     if len(viz_result) != 1:
-        print viz_result
-        selection = int(raw_input("More than one candidate found, which is the correct object?  "))
+        print(viz_result)
+        selection = int(input("More than one candidate found, which is the correct object?  "))
 
         viz_result = viz_result[selection]
         if args.apass:
@@ -174,12 +174,12 @@ if not args.tc:
         table =  comparisons[u'I/322A/out']
         
     table.sort('_r')
-    print table
-    print "==="
-    which_comp = int(raw_input("Which comparison to use?     ")) # Need to make a selection for which comparison object
+    print(table)
+    print("===")
+    which_comp = int(input("Which comparison to use?     ")) # Need to make a selection for which comparison object
 
     if which_comp == 0:
-        cont = raw_input("WARNING! Target is indexed as 0 in this table, you have selected 0 as the comparison also. Do you wish to continue? [y/n] ")
+        cont = input("WARNING! Target is indexed as 0 in this table, you have selected 0 as the comparison also. Do you wish to continue? [y/n] ")
         if cont == 'y':
             pass
         else:
@@ -234,39 +234,39 @@ if not args.tc:
         
         
 
-    print "\n==="
-    print "Target coords = ",targ_ra,targ_dec
-    print "Target coords = ",targ_coords.to_string('hmsdms')
-    print "Target Vmag = %.2f"%(table[0]['Vmag'])
-    print "Target B-V = %.2f"%(table[0]['Bmag'] - table[0]['Vmag'])
+    print("\n===")
+    print("Target coords = ",targ_ra,targ_dec)
+    print("Target coords = ",targ_coords.to_string('hmsdms'))
+    print("Target Vmag = %.2f"%(table[0]['Vmag']))
+    print("Target B-V = %.2f"%(table[0]['Bmag'] - table[0]['Vmag']))
 
-    print '='
+    print('=')
 
-    print "Comparison coords = ",comp_ra,comp_dec
-    print "Comparison coords = ",comp_coords.to_string('hmsdms')
-    print "Comparison Vmag = %.2f"%table[which_comp]['Vmag']
-    print "Comparison B-V = %.2f"%(table[which_comp]['Bmag'] - table[which_comp]['Vmag'])
+    print("Comparison coords = ",comp_ra,comp_dec)
+    print("Comparison coords = ",comp_coords.to_string('hmsdms'))
+    print("Comparison Vmag = %.2f"%table[which_comp]['Vmag'])
+    print("Comparison B-V = %.2f"%(table[which_comp]['Bmag'] - table[which_comp]['Vmag']))
 
-    print '='
+    print('=')
 
-    print "Position angle = %.3f"%pa
+    print("Position angle = %.3f"%pa)
     if args.instrument == 'EFOSC':
-		print "Rotator angle (EFOSC) = %.3f"%(90-pa)
-    print "Separation = %.3f arcmin"%sep
-    print "Midpoint coords = ",mid.to_string('hmsdms')
-    print "=== \n"
+        print("Rotator angle (EFOSC) = %.3f"%(90-pa))
+    print("Separation = %.3f arcmin"%sep)
+    print("Midpoint coords = ",mid.to_string('hmsdms'))
+    print("=== \n")
     
     if args.precess:
-        print '= WARNING, THESE MIGHT NOT BE ACCURATE'
-        print "Precessed target coords = ",corrected_targ.to_string('hmsdms')
-        print "Precessed comparison coords = ",corrected_comp.to_string('hmsdms')
-        print "Precessed Position angle = ",corrected_pa
-        print "Precessed Separation = ",corrected_sep.to(u.deg).value," arcmin"
-        print "Precessed Midpoint coords = ",corrected_mid.to_string('hmsdms')
-        print "=== \n"
+        print('= WARNING, THESE MIGHT NOT BE ACCURATE')
+        print("Precessed target coords = ",corrected_targ.to_string('hmsdms'))
+        print("Precessed comparison coords = ",corrected_comp.to_string('hmsdms'))
+        print("Precessed Position angle = ",corrected_pa)
+        print("Precessed Separation = ",corrected_sep.to(u.deg).value," arcmin")
+        print("Precessed Midpoint coords = ",corrected_mid.to_string('hmsdms'))
+        print("=== \n")
 
-print 'PLEASE CHECK BOX / SLIT IN DS9, IT MAY BE OF THE INCORRECT DIMENSIONS!!!!!'
-print 'TARGET IS RED CROSSHAIR, COMPARISON IS BLUE'
+print('PLEASE CHECK BOX / SLIT IN DS9, IT MAY BE OF THE INCORRECT DIMENSIONS!!!!!')
+print('TARGET IS RED CROSSHAIR, COMPARISON IS BLUE')
 
 
 if args.twomass:
@@ -287,7 +287,7 @@ COMP_RA = comp_ra
 COMP_DEC = comp_dec
 
 if not args.print_to_screen:
-    os.system('ds9 %s size %.1f %.1f arcmin %s coord %f %f degrees  \
+    os.system('/home/james/Downloads/ds9 %s size %.1f %.1f arcmin %s coord %f %f degrees  \
                       -regions system wcs -regions command "point %fd %fd # point=cross 40 color=red" \
                       -regions command "point %fd %fd # point=cross 40 color=blue" \
                       -regions command "box(%fd,%fd,%f",%f",%f)" \
@@ -298,8 +298,8 @@ if not args.print_to_screen:
                         -wcs fk5 &' %(image,fov,fov,image,MID_RA,MID_DEC,TARG_RA,TARG_DEC,COMP_RA,COMP_DEC,MID_RA,MID_DEC,slit_length*slit_correction_factor,slit_width*slit_correction_factor,pa-90,args.target))
 
 else:
-    print '\n ------- COPY AND PASTE THE FOLLOWING INTO A TERMINAL ---------'
-    print 'ds9 %s size %.1f %.1f arcmin %s coord %f %f degrees  \
+    print('\n ------- COPY AND PASTE THE FOLLOWING INTO A TERMINAL ---------')
+    print('ds9 %s size %.1f %.1f arcmin %s coord %f %f degrees  \
                       -regions system wcs -regions command "point %fd %fd # point=cross 40 color=red" \
                       -regions command "point %fd %fd # point=cross 40 color=blue" \
                       -regions command "box(%fd,%fd,%f",%f",%f)" \
@@ -307,5 +307,5 @@ else:
                       -grid title no -grid numerics color black -grid labels yes -grid labels color black \
                        -grid numerics type exterior \
                        -grid title yes -grid title text %s -grid title def no \
-                        -wcs fk5 &' %(image,fov,fov,image,MID_RA,MID_DEC,TARG_RA,TARG_DEC,COMP_RA,COMP_DEC,MID_RA,MID_DEC,slit_length*slit_correction_factor,slit_width*slit_correction_factor,pa-90,args.target)
-print '\n'
+                        -wcs fk5 &' %(image,fov,fov,image,MID_RA,MID_DEC,TARG_RA,TARG_DEC,COMP_RA,COMP_DEC,MID_RA,MID_DEC,slit_length*slit_correction_factor,slit_width*slit_correction_factor,pa-90,args.target))
+print('\n')
