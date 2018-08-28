@@ -13,29 +13,27 @@ def extract_flux_x(frame,x_beg,x_end,y_cont,dy_cont,spec_w,bkg_w,bkg_off):
     spec = (spec_2d - bkg[:,None]).sum(axis=0)    
     return x_beg+max_ind, spec
 def extract_flux_y(frame,x_beg,x_end,y_line,dy_line,spec_w,bkg_w,bkg_off):        frame_subset = frame[int(y_line-dy_line/2):int(y_line+dy_line/2)+1,int(x_beg):int(x_end)]    
-    y =  np.arange(frame_subset.shape[0])        trace = model_track(frame_subset,y)        spec = []         for i in range(dy_line):        spec.append(frame_subset[i][trace[i]])    
-    # spec_2d, bkg_1_2d, bkg_2_2d = spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off)    
-    # bkg = np.column_stack((bkg_1_2d,bkg_2_2d)).mean(axis=1)    
-    # spec = (spec_2d - bkg[:,None]).sum(axis=1)    
+    y =  np.arange(frame_subset.shape[0])        trace = model_track(frame_subset,y)        spec_2d, bkg_1_2d, bkg_2_2d = spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off)    
+    bkg = np.column_stack((bkg_1_2d,bkg_2_2d)).mean(axis=1)    
+    spec = (spec_2d - bkg[:,None]).sum(axis=1)    
     return np.array(spec)
 
 def spec_regions(frame_subset,y,spec_w,bkg_w,bkg_off):
-    max_ind = model_track(frame_subset,y)
-    spec_cut = np.array([np.arange(im-spec_w/2,im+spec_w/2+1).tolist() for im in max_ind])
-    spec_cut[spec_cut<0] = 0
-    spec_cut[spec_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1
-    bkg_1_cut = np.array([np.arange(im-bkg_off-bkg_w/2,im-bkg_off+bkg_w/2+1).tolist() for im in max_ind])
-    bkg_1_cut[bkg_1_cut<0] = 0
-    bkg_1_cut[bkg_1_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1
-    bkg_2_cut = np.array([np.arange(im+bkg_off-bkg_w/2,im+bkg_off+bkg_w/2+1).tolist() for im in max_ind]) 
+    # Find the location of the trace as a function of y    max_ind = model_track(frame_subset,y)    # get the indices/pixels of the region of interest for the trace
+    spec_cut = np.array([np.arange(im-spec_w/2,im+spec_w/2+1).tolist() for im in max_ind])        # replace negative values
+    spec_cut[spec_cut<0] = 0    # remove indices that fall outside the region of interest
+    spec_cut[spec_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1    # get the indices of the background region to the left of the trace
+    bkg_1_cut = np.array([np.arange(im-bkg_off-bkg_w/2,im-bkg_off+bkg_w/2+1).tolist() for im in max_ind])    # replace negative values
+    bkg_1_cut[bkg_1_cut<0] = 0    # remove indices that fall outside the region of interest    bkg_1_cut[bkg_1_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1    # get the indices of the background region to the right of the trace
+    bkg_2_cut = np.array([np.arange(im+bkg_off-bkg_w/2,im+bkg_off+bkg_w/2+1).tolist() for im in max_ind])     # replace negative values
     bkg_2_cut[bkg_2_cut<0] = 0
-    bkg_2_cut[bkg_2_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1
+    # remove indices that fall outside the region of interest    bkg_2_cut[bkg_2_cut>=frame_subset.shape[1]] = frame_subset.shape[1] - 1         # get pixel arrays into correct shape
     b_spec_ind = np.broadcast_arrays(y[:,None],spec_cut)
     spec_ind = np.array([b_spec_ind[0].tolist(),b_spec_ind[1].tolist()]).astype(int)
     b_bkg_1_ind = np.broadcast_arrays(y[:,None],bkg_1_cut)
     bkg_1_ind = np.array([b_bkg_1_ind[0].tolist(),b_bkg_1_ind[1].tolist()]).astype(int)
     b_bkg_2_ind = np.broadcast_arrays(y[:,None],bkg_2_cut)
-    bkg_2_ind = np.array([b_bkg_2_ind[0].tolist(),b_bkg_2_ind[1].tolist()]).astype(int)    return frame_subset,spec_ind    return np.array([frame_subset[spec_ind[0]],frame_subset[spec_ind[1]]])#, np.array([frame_subset[bkg_1_ind[0]],frame_subset[bkg_1_ind[1]]]), np.array([frame_subset[bkg_2_ind[0]],frame_subset[bkg_2_ind[1]]])
+    bkg_2_ind = np.array([b_bkg_2_ind[0].tolist(),b_bkg_2_ind[1].tolist()]).astype(int)    return frame_subset[spec_ind[0],spec_ind[1]], frame_subset[bkg_1_ind[0],bkg_1_ind[1]], frame_subset[bkg_2_ind[0],bkg_2_ind[1]]
   def model_track(data,y):    """Function that takes in some subset of the data frame and outputs a list of the modelled maxima """    
     # Cubic fit to the     p = np.polyfit(y,np.argmax(data,axis=1),3)    mod = np.around(np.polyval(p,y)).astype(int)    return mod
 def moffat_x_mod(a,r):    x = 2. * (a[1]-1.) / (a[0] * a[0])    y = 1. + ((r-a[2])/a[0])**2.    return a[3] * (x * (y ** -a[1])) + a[4]
@@ -83,8 +81,8 @@ for i,f in enumerate(l):
     else:
         hdu.close()
 x_left = np.array(x_left)y_left = np.array(y_left)x_right = np.array(x_right)y_right = np.array(y_right)mjd = np.array(mjd)
-ref_i = np.where(np.array(flist)==ref_frame)
-print("X_left now = ",x_left[-1],"; X_left ref = ",x_left[ref_i])print("Y_left now = ",y_left[-1],"; Y_left ref = ",y_left[ref_i])print("X_right now = ",x_right[-1],"; X_right ref = ",x_right[ref_i])print("Y_right now = ",y_right[-1],"; Y_right ref = ",y_right[ref_i])
+ref_i = np.where(np.array(flist)==ref_frame)print("\n---")
+print("X_left now = %.2f; X_left ref = %.2f; delta(X_left) = %.2f pixels"%(x_left[-1],x_left[ref_i],x_left[-1]-x_left[ref_i]))print("Y_left now = %.2f; Y_left ref = %.2f; delta(Y_left) = %.2f pixels"%(y_left[-1],y_left[ref_i],y_left[-1]-y_left[ref_i]))print("\nX_right now = %.2f; X_right ref = %.2f; delta(X_right) = %.2f pixels"%(x_right[-1],x_right[ref_i],x_right[-1]-x_right[ref_i]))print("Y_right now = %.2f; Y_right ref = %.2f; delta(Y_right) = %.2f pixels"%(y_right[-1],y_right[ref_i],y_right[-1]-y_right[ref_i]))print("--- \n")
 plt.figure(figsize=(11.69,8.27))
 plt.subplot(211)if args.n_images is None:
     plt.plot(mjd-mjd[0],x_left-x_left[ref_i],'k.')else:    plt.plot((mjd-mjd[0])[1:],(x_left-x_left[ref_i])[1:],'k.')plt.title("x centroid at y~"+str(y_cont)+" (Target)")plt.xlabel("JD from start of observations")plt.ylabel("x centroid - reference")
