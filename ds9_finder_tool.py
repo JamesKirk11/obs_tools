@@ -63,7 +63,19 @@ if args.instrument == 'ALFOSC':
     slit_width = 40
     slit_length = 6.3*60
 
+
+if args.instrument == 'IMACS_f2':
+    fov = 27.4
+    search_radius = 0.2
+    slit_width = fov*60
+    slit_length = fov*60
     
+if args.instrument == 'IMACS_f4':
+    fov = 15.4
+    search_radius = 0.2	
+    slit_width = fov*60
+    slit_length = fov*60
+
     
 if args.tc:
     targ_ra_hms,targ_dec_dms = args.tc[0].split()
@@ -173,6 +185,7 @@ if not args.tc:
     else:
         table =  comparisons[u'I/322A/out']
         
+    
     table.sort('_r')
     print(table)
     print("===")
