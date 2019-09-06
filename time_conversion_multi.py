@@ -26,12 +26,13 @@ if args.table is not None:
 	ntransits = len(np.atleast_1d(transit_duration))
 	
 	if args.save:
-		new_tab = open("transit_times_and_obs_durations.txt",'w')
+		new_tab = open(args.table[:-4]+"_transit_times_and_obs_durations.txt",'w')
 	
 	for i in range(ntransits):
 		
 		obs_length_hours = float(transit_duration[i])*2+0.5
 		obs_length_mins = int(np.round(obs_length_hours*60))
+		transit_duration_mins = int(float(transit_duration[i])*60)
 		
 		print('\n##############\n')
 		print(planet[i],mid_point_date[i])
@@ -41,9 +42,9 @@ if args.table is not None:
 		
 		mid_point_ut = convert_to_datetime(mid_point_date[i],mid_point_time[i])
 		
-		start_time_ut = mid_point_ut - np.timedelta64(obs_length_mins,'m')
+		start_time_ut = mid_point_ut - np.timedelta64(transit_duration_mins+30,'m')
 		
-		end_time_ut = mid_point_ut + np.timedelta64(obs_length_mins,'m')
+		end_time_ut = mid_point_ut + np.timedelta64(transit_duration_mins,'m')
 		
 		observability_start = convert_to_datetime(observability_start_date[i], observability_start_time[i])
 
@@ -54,19 +55,21 @@ if args.table is not None:
 		
 		
 		if start_time_ut + np.timedelta64(30,'m') < observability_start:
+			# print('start time constrained by observability start')
 			start_time_ut = observability_start - np.timedelta64(30,'m')
 			end_time_ut = start_time_ut + np.timedelta64(obs_length_mins,'m')
 			
 		if end_time_ut > observability_end:
+			# print('end time constrained by observability end')
 			end_time_ut = observability_end
 		
 		if start_time_ut + np.timedelta64(obs_length_mins,'m') < end_time_ut:
+			# print('updating end time')
 			end_time_ut = start_time_ut + np.timedelta64(obs_length_mins,'m')
 			
 		if end_time_ut - np.timedelta64(obs_length_mins,'m') < start_time_ut and end_time_ut - np.timedelta64(obs_length_mins,'m') > observability_start:
 			start_time_ut = end_time_ut - np.timedelta64(obs_length_mins,'m')
 			
-		
 		obs_length = end_time_ut - start_time_ut
 		 
 		mid_point_local = mid_point_ut - np.timedelta64(zone[i],'h')
