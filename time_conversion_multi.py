@@ -50,9 +50,13 @@ if args.table is not None:
 
 		observability_end = convert_to_datetime(observability_end_date[i], observability_end_time[i])
 		
+		max_obs_allowed = observability_end-observability_start+np.timedelta64(30,'m')
+		max_obs_allowed_hours = max_obs_allowed.astype(float)/60
+		# print("Full observation duration allowed = %s minutes (%.2f hours)"%(observability_end-observability_start+np.timedelta64(30,'m'),(observability_end-observability_start+np.timedelta64(30,'m')).astype(float)/60))
+		print("Full observation duration allowed = %s minutes (%.2f hours)"%(max_obs_allowed,max_obs_allowed_hours))
 		
-		print("Full observation duration allowed = %s minutes (%.2f hours)"%(observability_end-observability_start+np.timedelta64(30,'m'),(observability_end-observability_start+np.timedelta64(30,'m')).astype(float)/60))
-		
+		if (max_obs_allowed_hours - obs_length_hours) < -1:
+			print("WARNING!! Max allowed observation time 1 hour less than desired observation time!")
 		
 		if start_time_ut + np.timedelta64(30,'m') < observability_start:
 			# print('start time constrained by observability start')
@@ -87,7 +91,10 @@ if args.table is not None:
 			new_tab.write("\nFull observation duration allowed = %s minutes (%.2f hours)"%(observability_end-observability_start+np.timedelta64(30,'m'),(observability_end-observability_start+np.timedelta64(30,'m')).astype(float)/60))
 			new_tab.write("\nObs start (UT) = %s ; Obs mid (UT) = %s ; Obs end (UT) = %s ; Obs dur = %s (%.2f hours) \n"%(start_time_ut,mid_point_ut,end_time_ut,obs_length,obs_length.astype(float)/60))
 			new_tab.write("Obs start (local) = %s ; Obs mid (local) = %s ; Obs end (local) = %s ; Obs dur = %s (%.2f hours) \n"%(start_time_local,mid_point_local,end_time_local,obs_length,obs_length.astype(float)/60))
-		
+
+			if (max_obs_allowed_hours - obs_length.astype(float)/60) < -1:
+				new_tab.write("WARNING!! Max allowed observation time 1 hour less than desired observation time!\n")
+
 	if args.save:
 		new_tab.close()
 	
