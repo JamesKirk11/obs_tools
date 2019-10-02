@@ -52,8 +52,8 @@ if args.table is not None:
         mid_point_ut = convert_to_datetime(mid_point_date[i],mid_point_time[i])
         
         if args.tel.lower() == 'k':
-            start_time_ut = mid_point_ut - np.timedelta64(transit_duration_mins/2+90,'m')
-            end_time_ut = mid_point_ut + np.timedelta64(transit_duration_mins/2+60,'m')
+            start_time_ut = mid_point_ut - np.timedelta64(int(np.round(transit_duration_mins/2))+90,'m')
+            end_time_ut = mid_point_ut + np.timedelta64(int(np.round(transit_duration_mins/2+60)),'m')
         
         if args.tel.lower() == 'm':
             start_time_ut = mid_point_ut - np.timedelta64(transit_duration_mins+30,'m')
