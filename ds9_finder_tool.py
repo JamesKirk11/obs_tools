@@ -75,6 +75,13 @@ if args.instrument == 'IMACS_f4':
     search_radius = 0.2	
     slit_width = fov*60
     slit_length = fov*60
+    
+
+if args.instrument == 'NIRSPEC':
+    fov = 46/60
+    search_radius = 0.2	
+    slit_width = 0.43/60
+    slit_length = 12/60
 
     
 if args.tc:
