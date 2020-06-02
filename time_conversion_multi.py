@@ -11,6 +11,7 @@ parser.add_argument('-oe',help='End of target observability in UT',type=str)
 parser.add_argument('-table',help='Supply table for calculations if doing for multiple nights')
 parser.add_argument('-save',help='save output to table?',action="store_true")
 parser.add_argument('-tel',help='Which telescope are we observing with? If Keck (K), baseline is transit +2 (baseline) +0.5 (extra duration) +0.5 (setup) = +3 hours. If Magellan (M), baseline is 2x transit +0.5 hours.')
+parser.add_argument('-hard',help="Use a hard limit on the out of transit baseline? i.e. don't maximise out of transit baseline by having imbalanced pre- and post-transit. This is most time economical",action="store_true")
 args = parser.parse_args()
 
 
@@ -50,6 +51,8 @@ if args.table is not None:
         print("\nFull (desired) observation duration = %d minutes (%.2f hours) "%(obs_length_mins,obs_length_hours))
 
         mid_point_ut = convert_to_datetime(mid_point_date[i],mid_point_time[i])
+        transit_start_ut = mid_point_ut - np.timedelta64(int(np.round(transit_duration_mins/2)),'m')
+        transit_end_ut = mid_point_ut + np.timedelta64(int(np.round(transit_duration_mins/2)),'m')
 
         if args.tel.lower() == 'k':
             # start_time_ut = mid_point_ut - np.timedelta64(int(np.round(transit_duration_mins/2))+90,'m')
@@ -73,31 +76,49 @@ if args.table is not None:
         if (max_obs_allowed_hours - obs_length_hours) < -1:
             print("WARNING!! Max allowed observation time 1 hour less than desired observation time!")
 
-        if start_time_ut + np.timedelta64(30,'m') < observability_start:
-            start_time_ut = observability_start - np.timedelta64(30,'m')
-            end_time_ut = start_time_ut + np.timedelta64(obs_length_mins,'m')
-
-        if end_time_ut > observability_end:
-            end_time_ut = observability_end
-
-        if start_time_ut + np.timedelta64(obs_length_mins,'m') < end_time_ut:
-            end_time_ut = start_time_ut + np.timedelta64(obs_length_mins,'m')
-
-        if end_time_ut - np.timedelta64(obs_length_mins,'m') < start_time_ut: #and
-            if end_time_ut - np.timedelta64(obs_length_mins,'m') > observability_start:
-                start_time_ut = end_time_ut - np.timedelta64(obs_length_mins,'m')
-            if end_time_ut - np.timedelta64(obs_length_mins,'m') < observability_start - np.timedelta64(30,'m'):
+        if not args.hard:
+            if start_time_ut + np.timedelta64(30,'m') < observability_start:
                 start_time_ut = observability_start - np.timedelta64(30,'m')
+                end_time_ut = start_time_ut + np.timedelta64(obs_length_mins,'m')
+    
+            if end_time_ut > observability_end:
+                end_time_ut = observability_end
+    
+            if start_time_ut + np.timedelta64(obs_length_mins,'m') < end_time_ut:
+                end_time_ut = start_time_ut + np.timedelta64(obs_length_mins,'m')
+    
+            if end_time_ut - np.timedelta64(obs_length_mins,'m') < start_time_ut: #and
+                if end_time_ut - np.timedelta64(obs_length_mins,'m') > observability_start:
+                    start_time_ut = end_time_ut - np.timedelta64(obs_length_mins,'m')
+                if end_time_ut - np.timedelta64(obs_length_mins,'m') < observability_start - np.timedelta64(30,'m'):
+                    start_time_ut = observability_start - np.timedelta64(30,'m')
+                    
+        if args.hard:
+            if start_time_ut + np.timedelta64(30,'m') < observability_start:
+                start_time_ut = observability_start - np.timedelta64(30,'m')
+            if end_time_ut > observability_end:
+                end_time_ut = observability_end
 
         obs_length = end_time_ut - start_time_ut
 
         mid_point_local = mid_point_ut - np.timedelta64(zone[i],'h')
         start_time_local = start_time_ut - np.timedelta64(zone[i],'h')
         end_time_local = end_time_ut - np.timedelta64(zone[i],'h')
+        
+        pre_baseline = (transit_start_ut-(start_time_ut + np.timedelta64(30,'m')))/np.timedelta64(1, 'm')
+        print(pre_baseline)
+        if pre_baseline < 0:
+            pre_baseline = 0
+        
+        post_baseline = (end_time_ut-transit_end_ut)/np.timedelta64(1, 'm')
+        if post_baseline < 0:
+            post_baseline = 0
 
         print("\nObs start (UT) = %s ; Obs mid (UT) = %s ; Obs end (UT) = %s ; Obs dur = %s (%.2f hours) \n"%(start_time_ut,mid_point_ut,end_time_ut,obs_length,obs_length.astype(float)/60))
 
         print("Obs start (local) = %s ; Obs mid (local) = %s ; Obs end (local) = %s ; Obs dur = %s (%.2f hours) \n"%(start_time_local,mid_point_local,end_time_local,obs_length,obs_length.astype(float)/60))
+        
+        print("Pre transit baseline = %s mins ; Post transit baseline = %s mins \n"%(pre_baseline,post_baseline))
 
         if args.save:
             new_tab.write('\n##############\n')
@@ -106,6 +127,8 @@ if args.table is not None:
             new_tab.write("\nFull observation duration allowed = %s (%.2f hours)"%(observability_end-observability_start+np.timedelta64(30,'m'),(observability_end-observability_start+np.timedelta64(30,'m')).astype(float)/60))
             new_tab.write("\nObs start (UT) = %s ; Obs mid (UT) = %s ; Obs end (UT) = %s ; Obs dur = %s (%.2f hours) \n"%(start_time_ut,mid_point_ut,end_time_ut,obs_length,obs_length.astype(float)/60))
             new_tab.write("Obs start (local) = %s ; Obs mid (local) = %s ; Obs end (local) = %s ; Obs dur = %s (%.2f hours) \n"%(start_time_local,mid_point_local,end_time_local,obs_length,obs_length.astype(float)/60))
+            new_tab.write("Pre transit baseline = %s mins ; Post transit baseline = %s mins \n"%(pre_baseline,post_baseline))
+
 
             if (max_obs_allowed_hours - obs_length.astype(float)/60) < -1:
                 new_tab.write("WARNING!! Max allowed observation time 1 hour less than desired observation time!\n")
