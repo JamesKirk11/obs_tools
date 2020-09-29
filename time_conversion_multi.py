@@ -11,7 +11,7 @@ parser.add_argument('-oe',help='End of target observability in UT',type=str)
 parser.add_argument('-table',help='Supply table for calculations if doing for multiple nights')
 parser.add_argument('-save',help='save output to table?',action="store_true")
 parser.add_argument('-use_quarters',help='split the observations neatly into quarters for Keck obs?',action="store_true")
-parser.add_argument('-tel',help='Which telescope are we observing with? If Keck (K), baseline is transit +2 (baseline) +0.5 (extra duration) +0.5 (setup) = +3 hours. If Magellan (M), baseline is 2x transit +0.5 hours.')
+parser.add_argument('-tel',help='Which telescope are we observing with? If Keck (K), baseline is transit +2 (baseline) +0.5 (extra duration) +0.5 (setup) = +3 hours. If Magellan (M), baseline is transit +2 (baseline) +0.25 (acquisition) +0.5 (standard) = +2.75 hours')
 parser.add_argument('-hard',help="Use a hard limit on the out of transit baseline? i.e. don't maximise out of transit baseline by having imbalanced pre- and post-transit. This is most time economical",action="store_true")
 args = parser.parse_args()
 
@@ -41,7 +41,7 @@ if args.table is not None:
             obs_length_hours = float(transit_duration[i])+3#2+0.5
 
         elif args.tel.lower() == 'm':
-            obs_length_hours = float(transit_duration[i])*2+0.5
+            obs_length_hours = float(transit_duration[i])+2.75
 
         else:
             raise NameError("have to define -tel as 'm' (Magellan) or 'k' (Keck)")
@@ -79,8 +79,10 @@ if args.table is not None:
             end_time_ut = mid_point_ut + np.timedelta64(int(np.round(transit_duration_mins/2)+15+60),'m')
 
         if args.tel.lower() == 'm':
-            start_time_ut = mid_point_ut - np.timedelta64(transit_duration_mins+30,'m')
-            end_time_ut = mid_point_ut + np.timedelta64(transit_duration_mins,'m')
+            # start_time_ut = mid_point_ut - np.timedelta64(transit_duration_mins+30,'m')
+            # end_time_ut = mid_point_ut + np.timedelta64(transit_duration_mins,'m')
+            start_time_ut = mid_point_ut - np.timedelta64(int(np.round(transit_duration_mins/2)+15+60+30),'m')
+            end_time_ut = mid_point_ut + np.timedelta64(int(np.round(transit_duration_mins/2)+60),'m')
 
 
         observability_start = convert_to_datetime(observability_start_date[i], observability_start_time[i])
