@@ -7,8 +7,10 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Make finding chart with DS9')
 parser.add_argument("target",help="Name of object to be resolved by Vizier",type=str)
-parser.add_argument("-inst","--instrument",help="Which instrument? Needed for field of view & slit width and length. Can be: ACAM/EFOSC/ALFOSC/IMACS_f2,IMACS_f4,NIRSPEC. Default = ACAM",default='ACAM')
+parser.add_argument("-inst","--instrument",help="Which instrument? Needed for field of view & slit width and length. Can be: ACAM/EFOSC/ALFOSC/IMACS_f2,IMACS_f4,NIRSPEC.")
 parser.add_argument('-cat',"--catalog",help="Name of catalog to query [APASS9/UCAC4], default = UCAC4",default='UCAC4')
+
+parser.add_argument("-fov","--fov",help="Define the field-of-view in arcminutes if not using a pre-defined instrument.",type=float)
 
 parser.add_argument("-s","--slit",help="Use this to define the width of the slit in arcseconds, default = 40",type=int,default=40)
 parser.add_argument("-v","--magnitude_cut",help="If wanting to cut V magnitude at a partciular value. Default = 14.",type=float,default=14)
@@ -82,6 +84,15 @@ if args.instrument == 'NIRSPEC':
     search_radius = 0.2
     slit_width = 0.43/60
     slit_length = 12/60
+
+if args.instrument is None:
+    if args.fov is not None:
+        fov = args.fov
+        search_radius = fov
+        slit_width = fov*60
+        slit_length = fov*60
+    else:
+        raise ValueError("Must either define -inst or -fov")
 
 
 if args.tc:
